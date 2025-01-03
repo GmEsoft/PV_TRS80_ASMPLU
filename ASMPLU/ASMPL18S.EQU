@@ -1,0 +1,633 @@
+D0000	EQU	00000H		; 0000 or EDTASM cmd B - Basic
+RST08	EQU	00008H		; ZBUG breakpoint
+RST10	EQU	00010H		;
+RST18	EQU	00018H		; Compare HL & DE
+RST20	EQU	00020H		; Output single char in A to selected device(s)
+RST28	EQU	00028H		; Output single char following RST 28H to selected device(s)
+KBDSCN	EQU	0002BH		; Scan keyboard
+RST30	EQU	00030H		; ZBUG Parse expression
+VDCHAR	EQU	00033H		; Disp char in A
+RST38	EQU	00038H		;
+PRCHAR	EQU	0003BH		; Print char in A
+KBWAIT	EQU	00049H		; Wait keystroke
+DELAYBC	EQU	00060H		; Delay BC
+CSOFF	EQU	001F8H		; Cassette off
+CSON	EQU	00215H		; Cassette on
+CSIN	EQU	00235H		; Cassette input byte
+CSOUT	EQU	00264H		; Cassette output byte
+CSHWR	EQU	00287H		; Cassette output header
+CSHIN	EQU	00296H		; Cassette input header
+D1999	EQU	01999H		; 6553 (max line number is 65529)
+CP16ROM	EQU	01C90H		; Compare HL & DE
+CASSSEL	EQU	037E4H		; Cassette unit selector
+CSTATM	EQU	03C3DH		; Cassette status 'M'emory write fault
+CSTATC	EQU	03C3EH		; Cassette status 'C'hecksum error
+CSTATUS	EQU	03C3FH		; Cassette blinking asterisk
+VRST08	EQU	04000H		; RST 08 jump
+VRST08A	EQU	04001H		; RST 08 address (ZBUG bkpt)
+VRST18	EQU	04006H		; RST 18 jump
+VRST18A	EQU	04007H		; RST 18 address (Compare HL & DE)
+VRST20	EQU	04009H		; RST 20 jump
+VRST20A	EQU	0400AH		; RST 20 address (Output single char in A)
+VRST28	EQU	0400CH		; RST 28 jump
+VRST28A	EQU	0400DH		; RST 28 address (Output single char at PC)
+VRST30	EQU	0400FH		; RST 30 jump
+VRST30A	EQU	04010H		; RST 30 address (eval expression)
+VKIDVRA	EQU	04016H		; Keyboard driver vector
+VCSRPOS	EQU	04020H		; Video cursor position
+PPAGLEN	EQU	04028H		; Printer page length + 1
+KISTATE	EQU	04036H		; KI pressed keys state
+
+BCASBUF	EQU	04100H		; Cassette system block buffer; block checksum
+BCASLEN	EQU	04101H		; Cassette system block length
+BPRGNAM	EQU	04104H		; Program name buffer
+LST2RPL	EQU	041F0H		; Len of str to rpl (cmd S) flwd by str - ZBUG bnch instr
+STR2RPL	EQU	041F1H		; Str to replace (cmd S) - ZBUG mem mod enable flag
+ZINPTYP	EQU	041F2H		; ZBUG address input type 0:mem 1:16b 2:8b 3:flgs
+ZMBWFLG	EQU	041F3H		; ZBUG Exam mode (Mnemo=0, Word=1, Byte=2)
+ZNUMFLG	EQU	041F4H		; ZBUG Num dbg flg (Symb=0, ASCII if bit 7)
+ZOUTRDX	EQU	041F5H		; ZBUG Output radix
+ZCURLOC	EQU	041F7H		; ZBUG current location
+ZTSTOP0	EQU	041F8H		; ZBUG 2 stop points (5 bytes each)
+ZNXTLOC	EQU	041F9H		; ZBUG next location
+ZTSTOPS	EQU	041FBH		; ZBUG 2 stop + 8 break points (5 bytes each)
+LST2SUB	EQU	04201H		; Len of str to substitute (cmd S) followed by str
+STR2SUB	EQU	04202H		; Str to substitute (cmd S) - ZBUG 8 Bkpts
+ZTBKPTS	EQU	04205H		; Table of 8 breakpoints (5 bytes each)
+LST2FND	EQU	04212H		; Len of str to find (cmd F) followed by str
+STR2FND	EQU	04213H		; Str to find (cmd F)
+FSTRFND	EQU	04223H		; String found flag
+FFNDNLY	EQU	04224H		; Find only flag (no substitution)
+PCURLIN	EQU	04226H		; Pointer to current line
+LINEINC	EQU	04228H		; Line increment
+PFNDLIN	EQU	0422AH		; Pointer to found line
+PLSTLIN	EQU	0422CH		; Pointer to last line
+PNXTLIN	EQU	0422EH		; Pointer to next line
+PFSTLIN	EQU	04230H		; Pointer to first line
+PENDTXT	EQU	04232H		; Pointer to end of text
+PLAST	EQU	04234H		; Pointer to last RAM address
+PUSRORG	EQU	04236H		; Pointer to USRORG (command O)
+PORGREF	EQU	04238H		; ASM org ref = AFLAGIM && !AFLAGA0 ? PUSRORG : 0000H
+PORGAUT	EQU	0423AH		; ASM auto org for IM = pointer to end of symbol table
+PLSTLOC	EQU	0423CH		; Last location address pointer
+BCASPTR	EQU	0423EH		; Cassette buffer pointer
+INPBUF	EQU	04240H		; Input buffer
+FZBUGNO	EQU	042C1H		; ZBUG active (not 0) / No output (bit 7)
+EXPRSLT	EQU	042C2H		; Expression result
+PSYMTBL	EQU	042C4H		; Pointer to symbols table
+LINEPTR	EQU	042C6H		; Input line pointer
+LINELEN	EQU	042C8H		; Input line length
+RMNCHRS	EQU	042C8H		; Remaining chars counter
+PPRGNAM	EQU	042C9H		; Pointer to program name
+LPRGNAM	EQU	042CBH		; Length of program name (<= 6)
+LOCADDR	EQU	042CCH		; Location address ptr
+LOCADD1	EQU	042CDH		; Location address ptr + 1
+OPCODEP	EQU	042CEH		; Opcode prefix (0 if none)
+OPCODE0	EQU	042CFH		; Opcode byte 0
+OPCODE1	EQU	042D0H		; Opcode byte 0
+OPCODES	EQU	042D2H		; Opcodes length - ZBUG targ jump/call address
+ASMPC	EQU	042D4H		; Assembler instruction current PC
+ASMERRC	EQU	042D6H		; Assembler error counter
+FCSOUT	EQU	042D8H		; Cass out flag
+DVDPOS	EQU	042D9H		; Current logical position in line
+FPRCHAR	EQU	042DAH		; Print char flag (instead of video)
+LISTON	EQU	042DBH		; *LIST ON flag
+MLISTON	EQU	042DCH		; *MLIST ON flag
+FCASBLK	EQU	042DDH		; Flag for pending cassette block
+FERROR	EQU	042DEH		; Assembler error flag for pause
+CONDFLG	EQU	042DFH		; Skip assembly if not zero
+MACRFLG	EQU	042E1H		; Skip assembly in macro - ZBUG regs save area
+FMACRO	EQU	042E2H		; Flag macro being processed
+NPASS	EQU	042E3H		; ASM pass# - EDT ECMDC, not ECMDM - ZBUG=??
+FSKPLN	EQU	042F2H		; Flag to skip line numbers on output
+SMACCNT	EQU	042F3H		; Symbol to macro invocation counter to replace #$YM
+MACCT12	EQU	042F4H		; Macro invocation counter digits 1-2
+Z42F5	EQU	042F5H		; Used by ZBUG
+MACCT34	EQU	042F6H		; Macro invocation counter digits 3-4
+OPN1VAL	EQU	042F8H		; Operand 1 value
+OPADDR	EQU	042FAH		; Ptr to operator prio and address
+NMBASIS	EQU	042FCH		; Number basis for constant parsing
+NMBAS10	EQU	042FDH		; Force number basis to 10 for constant parsing
+FINKBD	EQU	04301H		; Flag indicating reading keyboard
+FINKBD	EQU	04301H		; Flag indicating reading keyboard
+ENDLNUM	EQU	04302H		; New end line number for block copy/move
+NXTLNUM	EQU	04304H		; Next line number for block copy/move
+SPLIMIT	EQU	04306H		; SP limit for stack overflow checking
+
+VSTART	EQU	04380H		; Main entry point - restart with new edit buffer
+VREST	EQU	04383H		; Restart with edit buffer preserved
+VRESTZB	EQU	04386H		; Restart with edit buffer and Z-bug bkpts preserved
+VPRCHAR	EQU	0438DH		; Print char
+VCSHIN	EQU	04390H		; Turn on cassette and read header
+VCSHWR	EQU	04393H		; Turn on cassette and write header
+VCSIN	EQU	04396H		; Cassette input byte
+VCSOUT	EQU	04399H		; Cassette output byte
+VCSOFF	EQU	0439CH		; Turn off cassette
+CCSHIN	EQU	0439FH		; Turn on cassette and read header
+CCSHWR	EQU	043A6H		; Turn on cassette and write header
+CCSOFF	EQU	043ADH		; Turn off cassette
+CSINW	EQU	043B2H		; Cassette input word HL
+CBLINK	EQU	043BBH		; Blink asterisk in upper right corner
+WAITKEY	EQU	043C4H		; Wait keystroke
+CTLKEYS	EQU	043E5H		; Recognized control keys
+KIDVR	EQU	043EBH		; Keyboard driver replacement routine (debounce)
+MOLDM1	EQU	04411H		; Old M1 ROM flag
+CKPAUSE	EQU	04412H		; Check for pause (Shift-@)
+WKEYBRK	EQU	04428H		; Wait any key, <BREAK> to abort
+JBREAK	EQU	0442DH		; <BREAK> key pressed
+RDYCASS	EQU	04437H		; Ready cassette
+PREADY	EQU	0443AH		; Prompt READY message and wait keypress
+DSTRB7	EQU	0443FH		; Disp string terminated with Bit 7
+DSTRB7A	EQU	04440H		; Display A followed by string terminated with Bit 7
+TAFLAGS	EQU	04446H		; Table of assembler flags
+AFLAGNL	EQU	04449H		; Assembler flag: NL = No Listing
+AFLAGNO	EQU	0444DH		; Assembler flag: NO = No Output
+AFLAGLP	EQU	04451H		; Assembler flag: LP = Line Printer
+AFLAGNS	EQU	04455H		; Assembler flag: NS = No Symbols table
+AFLAGWE	EQU	04459H		; Assembler flag: WE = Wait on Error
+AFLAGIM	EQU	0445DH		; Assembler flag: IM = assemble to Internal Memory
+AFLAGMO	EQU	04461H		; Assembler flag: MO = Manual Origin
+AFLAGAO	EQU	04465H		; Assembler flag: AO = Absolute Origin
+START	EQU	04487H		; Main entry point - restart with new edit buffer
+SCANRAM	EQU	04495H		; Scan the RAM to size it (bugged for full RAM systems)
+RESTART	EQU	044A6H		; Restart with edit buffer preserved
+ZCMDE	EQU	044DDH		; ZBUG '$E' cmd - exit ZBUG
+DOBREAK	EQU	044F9H		; EDTASM do break
+PROMPT	EQU	044FBH		; Main EDTASM prompt
+BADCMD	EQU	0455AH		; Disp BAD COMMAND error msg and abort
+ERROR	EQU	0455DH		; Disp error message and abort command
+DMSGBT7	EQU	04561H		; Disp message terminated with Bit 7, with NL
+DISPNL	EQU	04567H		; Disp <New Line>
+JRST20	EQU	0456AH		; Output single char in A to selected device(s)
+DTAB	EQU	0459AH		; Disp TAB
+JRST28	EQU	045A3H		; Output single char following RST 28H to selected device(s)
+SETVEC	EQU	045B3H		; Install vectors
+MSTRNFD	EQU	045ECH		; "STRING NOT FOUND"
+MBADLIN	EQU	045FCH		; "BAD LINE NUMBER"
+MBUFFUL	EQU	0460BH		; "BUFFER FULL"
+MBADCMD	EQU	04616H		; "BAD COMMAND"
+MBUFMTY	EQU	04621H		; "BUFFER EMPTY"
+MNOROOM	EQU	0462DH		; "NO ROOM BETWEEN LINES"
+MTOOLNG	EQU	04642H		; "NEW LINE TOO LONG"
+MRDYPRT	EQU	04653H		; "READY PRINTER"
+MBADPAR	EQU	04660H		; "BAD PARAMETER(S)"
+MRDYCAS	EQU	04670H		; "READY CASSETTE"
+MNONAME	EQU	0467EH		; "NONAME" default program name
+VPMTTBL	EQU	04684H		; Prompt command vector table
+CLRLINE	EQU	046C6H		; Clear line
+DOCLRLN	EQU	046D6H		; EDTASM do clear line
+GETLINE	EQU	046DBH		; Get text line (LD E,1EH: skip next LD E,00H)
+GETCMD	EQU	046DCH		; Get command line
+NXTKEY	EQU	046E6H		; Read next keystroke
+DOSCROL	EQU	04710H		; EDTASM do Scroll up/dowb
+SDOENTR	EQU	04721H		; CP 0E7H (skip next RST 20)
+DOENTER	EQU	04722H		; EDTASM do ENTER
+DOBKSP	EQU	04739H		; EDTASM do backspace
+FETCH	EQU	04763H		; Fetch to A ignoring space: Z if EOL, NC if digit
+SFTCHNI	EQU	04765H		; CP 0AFH (skip next XOR A)
+FETCHNI	EQU	04766H		; Fetch to A not ignoring space: Z if EOL, NC if digit
+TSTDIG	EQU	0478CH		; Test if A is a digit. C set if not.
+TSTLTR	EQU	04795H		; Test if A is a letter (uppercase). C set if not
+UNFETCH	EQU	0479CH		; Unfetch one char
+ECMDN	EQU	047AAH		; EDTASM cmd N - reNumber the lines N[line[,inc]]
+ECMDI	EQU	047E6H		; EDTASM cmd I - Insert lines I[line1[,inc]]
+DOINSRT	EQU	047F9H		; Do insert lines
+INPLINE	EQU	047FFH		; Input Source Line
+S4804	EQU	04804H		; LD B,0B7H (skip next OR A)
+DOLDIR	EQU	04861H		; Do LDIR if BC > 0
+FETLINC	EQU	04867H		; Fetch a line number and an increment
+FETINC	EQU	04872H		; Fetch an increment
+FINDPRV	EQU	04886H		; Find previous line number < HL
+FETNUMB	EQU	048CAH		; Fetch a line number
+FETDIGT	EQU	048DEH		; Fetch digit and add to line number HL
+FETLINE	EQU	048F6H		; Fetch a line expression
+BUG0001	EQU	04963H		; Possible BUG: should better be LD DE,(PENDTXT) ...
+DLNUM	EQU	049AAH		; Display line number in HL and ' '
+OUTSPC	EQU	049B8H		; Output white space
+DLNUM1	EQU	049BBH		; Display line number in HL - LD A,0AFH (skip next XOR A)
+ZDISDEC	EQU	049BCH		; Display DE in decimal
+TPOW10	EQU	049E1H		; Table of negated powers of 10
+CHK132C	EQU	049EBH		; Check avail buf space for 132 chars
+CHKBUFS	EQU	049F4H		; Check avail buf space for DE chars
+EBUFFUL	EQU	04A03H		; "BUFFER FULL" error
+ECMDF	EQU	04A09H		; EDTASM cmd F - Find str F[rng][$str] ($=ESC) - LD A,0AFH (!XOR A)
+ECMDS	EQU	04A0AH		; EDTASM cmd S - Substitute string S[range][$string][$string]
+SUB4AB2	EQU	04AB2H		; Do string substitution in source
+DOSUBST	EQU	04AE7H		; Do substitution
+X4B13	EQU	04B13H		; 06B7 - LD B,0B7H (="OR A")
+SUB4B19	EQU	04B19H		; Call compare strings?
+SUB4B43	EQU	04B43H		; Compare strings?
+FETSTRG	EQU	04B6EH		; Fetch escaped string for Find/Substitute
+CPYINPB	EQU	04B8AH		; Copy source line @HL to input buffer -> DE=length
+ECMDT	EQU	04B9DH		; EDTASM cmd T - hard copy source without line numbers T[line1[:line2]]
+ECMDH	EQU	04BA1H		; EDTASM cmd H - hard copy source with line numbers H[line1[:line2]]
+SECMDP	EQU	04BA7H		; LD B,0AFH (skip next XOR A)
+ECMDP	EQU	04BA8H		; EDTASM cmd P - print source P[line1[:line2]]
+OUTSRCL	EQU	04BCBH		; Output source line(s)
+OUTLINE	EQU	04BE9H		; Output source line
+ECMDUP	EQU	04C00H		; EDTASM cmd 'up arrow' - Display prev line
+SECMDDN	EQU	04C01H		; LD B,0AFH (skip next XOR A)
+ECMDDWN	EQU	04C02H		; EDTASM cmd 'down arrow' - Display next line
+FETRANG	EQU	04C27H		; Fetch a range of lines
+EBADPAR	EQU	04C42H		; "BAD PARAMETER(S)" error
+EBADLIN	EQU	04C51H		; "BAD LINE NUMBER" error
+ERROR1	EQU	04C54H		; Disp error message and abort command
+FETENDL	EQU	04C5FH		; Fetch end line (:nnnnn)
+FETLNCT	EQU	04C8BH		; Fetch line count (!nn)
+ECMDR	EQU	04CCBH		; EDTASM cmd R - Replace R[line[,inc]]
+DELCURL	EQU	04CD6H		; Delete current line
+ECMDD	EQU	04CE2H		; EDTASM cmd D - Delete lines D[line1[:line2]]
+DELRANG	EQU	04CE5H		; Delete a range of lines
+ECMDW	EQU	04D1CH		; EDTASM cmd W - Write source to cassette W[ filename]
+ECMDL	EQU	04D3BH		; EDTASM cmd L - Load file from cassette L[ filename]
+ECMDX	EQU	04D9CH		; EDTASM cmd X - Extend lines X[line1[:line2]] - LD A,0AFH (!XOR A)
+ECMDE	EQU	04D9DH		; EDTASM cmd E - Edit lines E[line1[:line2]]
+EDITOR	EQU	04DBFH		; Line editor ?
+OUTSTRZ	EQU	04DFDH		; Output null-terminated string of up to 129 chars
+DELCHRS	EQU	04E63H		; Delete B chars at HL
+EDTEXTD	EQU	04E80H		; Editor eXtend line
+EDTINSR	EQU	04E86H		; Editor Insert
+DELCHAR	EQU	04E9EH		; Delete char at HL
+INSPCHR	EQU	04EAEH		; Insert char at HL if printable
+INSCHAR	EQU	04EB5H		; Insert char at HL
+EDTSK	EQU	04EDDH		; Editor Do search (NC) or kill (C)
+ECMDM	EQU	04F04H		; EDTASM cmd M - Move Mtarg,range[,inc] - LD A,0AFH (!XOR A)
+ECMDC	EQU	04F05H		; EDTASM cmd C - Copy Ctarg,range[,inc]
+FETFNAM	EQU	04FDEH		; Fetch file name
+GETFNAM	EQU	04FEAH		; Get filename
+WCSFNM	EQU	05001H		; Write cass filename with RDY CASS
+RCSFNM	EQU	0502BH		; Read and chk cass filename with RDY CASS
+RCSFNM1	EQU	0502EH		; Read and chk cass filename w/o RDY CASS
+FETOPNI	EQU	05057H		; Fetch operand ignoring space
+FETOPN	EQU	0505CH		; Fetch operand not ignoring space
+SKCHARS	EQU	0508AH		; Skip chars
+TOPRNDS	EQU	0509EH		; Table of operands (regs, flags, ON/OFF)
+KEYWORD	EQU	05100H		; Scan keywords, HL->found value, C if not found
+CALLRET	EQU	05116H		; Dummy call
+
+EASMPSE	EQU	05117H		; Assembler error with pause on WE ====== START ASM CODE ======
+SEASSEM	EQU	0511BH		; LD A,0AFH (skip next XOR A)
+EASSEM	EQU	0511CH		; Assembler error without pause on WE
+TEEMSG7	EQU	05152H		; Tee message terminated with Bit 7, with NL
+TEEOUT	EQU	05155H		; Tee output
+OUTSEL	EQU	0515FH		; Output selector
+CLRFPC	EQU	05176H		; Clear print char flag
+CLRFPC	EQU	05176H		; Clear print char flag
+FETCH5	EQU	0517BH		; Fetch operand type 5 (IX/IY)
+SFETCH4	EQU	0517DH		; LD BC,043EH (skip next LD A,04H)
+FETCH4	EQU	0517EH		; Fetch operand type 4 (16bit regs)
+SFETCH3	EQU	05180H		; LD BC,033EH (skip next LD A,03H)
+FETCH3	EQU	05181H		; Fetch operand type 3 (8bit regs)
+FETCHA	EQU	05183H		; Fetch operand type (A)
+EMSINFO	EQU	0519EH		; "MISSING INFORMATION" error
+UNFPARS	EQU	051A4H		; Unfetch and parse expr
+JRST30	EQU	051AAH		; Parse expression ?
+LEXPR	EQU	051AFH		; Expression main loop
+XPENDNG	EQU	051D2H		; End of expr: exec pending operations
+ENDEXPR	EQU	051DBH		; End of expression, store result
+XHIPRIO	EQU	051E2H		; Exec higher priority operations
+PUSHOP	EQU	051EFH		; Push operand and operator address
+DOOPER	EQU	051F9H		; Unstack operand and operation, exec operation
+DPLUS	EQU	051FEH		; DE += HL
+DMINUS	EQU	05201H		; DE := HL-DE
+DOR	EQU	05206H		; DE |= HL
+DXOR	EQU	0520DH		; DE ^= HL
+DAND	EQU	05214H		; DE &= HL
+DMUL	EQU	0521BH		; DE *= HL
+DDIV	EQU	05232H		; DE /= HL
+DMOD	EQU	05274H		; DE .MOD. HL
+DEQU	EQU	05279H		; DE .EQU. HL
+DNEQ	EQU	05280H		; DE .NEQ. HL
+DSHL	EQU	05288H		; HL <<= DE
+DSHR	EQU	05299H		; HL >>= DE
+EDIV0	EQU	052A7H		; Div by 0 error
+GETOPER	EQU	052ADH		; Get operator
+PARSVAL	EQU	052E0H		; Parse value
+DOLLAR	EQU	05300H		; Current PC
+PARSUNY	EQU	0530CH		; Parse unary ops: ' $ - + ( .NOT.
+UMINUS	EQU	0531EH		; Unary minus
+UNOT	EQU	0531FH		; Unary not
+OPENPAR	EQU	05330H		; Opening '('
+EBADEXP	EQU	05338H		; "BAD EXPRESSION" error
+SQUOTE	EQU	0533EH		; Single quote
+JPARSLT	EQU	05352H		; Parse literal
+PARSLIT	EQU	05358H		; Parse literal value in dec/oct/hex
+VUNOPS	EQU	053B6H		; Unary operators vector table
+VBINOP	EQU	053D2H		; Binary operators vector table
+CHKSP	EQU	0544BH		; Check for stack overflow
+GETPNAM	EQU	0545EH		; Get program name (dft: NONAME)
+DFLAGS	EQU	05479H		; Display F-Flags or URDMF
+OUTSYMB	EQU	0547DH		; Output symbol
+ECMDA	EQU	05487H		; EDTASM cmd A - Assemble the source in buffer
+BUG0002	EQU	054F6H		; BUG: missing init of SMACCNT, disabling DLNUM on listing
+ASMLOOP	EQU	055FAH		; Assembler Main Loop - check for pause on error
+ASMNOWE	EQU	05613H		; Assembler: no wait on error
+LMACSUB	EQU	05686H		; Loop macro symbols substitution
+X56AF	EQU	056AFH		; Check 09H = TAB
+X56B3	EQU	056B3H		; Check 20H = ' '
+X56B7	EQU	056B7H		; Check 3BH = ';'
+X56BB	EQU	056BBH		; Check 2CH = ','
+X56FC	EQU	056FCH		; Check 09H = TAB
+X5700	EQU	05700H		; Check 20H = ' '
+X5704	EQU	05704H		; Check 3BH = ';'
+X5708	EQU	05708H		; Check 2CH = ','
+ETOOLNG	EQU	0573AH		; "NEW LINE TOO LONG" error
+SMACSYM	EQU	05740H		; Macro invocation counter symbol #$YM
+XMACSUB	EQU	05745H		; Exit macro substitution loop
+ASMNMAC	EQU	05776H		; End/skip macro processing
+ASMSTMT	EQU	057B6H		; Assemble statement (no '*' directive)
+ASMENDL	EQU	057C6H		; Assembler end of line or ';'
+ASMOK	EQU	057CAH		; OK to continue assembly
+EBADLBL	EQU	057CEH		; "BAD LABEL" error
+ASMELBL	EQU	057E8H		; Assembler end label
+S580B	EQU	0580BH		; CP 1AH (skip next LD A,(DE))
+AENDINS	EQU	0582DH		; Asm instr not found (macro?)
+CNTMAC	EQU	0585FH		; Count macro invocations
+SLCNTMC	EQU	05864H		; 013630 - LD BC,3036H (skip LD (HL),'0')
+LCNTMAC	EQU	05865H		; Loop to increment digits
+EBADOPC	EQU	058FDH		; "BAD OPCODE" error
+PARSSYM	EQU	0592BH		; Parse symbol
+EMACFWD	EQU	05A02H		; "MACRO FWD REF" error
+FET816	EQU	05A08H		; Fetch 8/16 bits opnd; ret if 16 bits or assem 8 bits
+ASMAND	EQU	05A1EH		; Assemble AND... single-opnd 8bit instr
+CHK8BS	EQU	05A3BH		; Check value is signed 8 bits
+CHK8B	EQU	05A3EH		; Check value is unsigned 8 bits
+CHKZFLG	EQU	05A40H		; Check that Z flag is set
+ASMBIT	EQU	05A49H		; Assemble BIT... CB-instr 2-opnd
+ASMRLC	EQU	05A61H		; Assemble RLC... CB-instr 1-opnd
+A8BOPN	EQU	05A6FH		; Assemble 8-bit operand into opcode
+CHKCPAR	EQU	05AA7H		; Check closing parenthesis, error if none
+EBADADM	EQU	05AADH		; "BAD ADDRESSING MODE" error
+ASMIXYO	EQU	05AB3H		; Assemble (IX/IY+offset)
+ASMIXIY	EQU	05AD6H		; Assemble IX/IY
+ADD2OPC	EQU	05AE3H		; Add 2 opcodes to length
+ASMADC	EQU	05AECH		; Assemble ADC, SBC 8/16 bits
+ASMADD	EQU	05B0DH		; Assemble ADD 8/16 bits
+A16BREG	EQU	05B25H		; Assemble 16-bit reg pair into opcode
+A16BB74	EQU	05B2AH		; Assemble reg pair id [B.7-B.4] into opcode 0
+A16BA74	EQU	05B2BH		; Assemble reg pair id [A.7-A.4] into opcode 0
+ASMDEC	EQU	05B53H		; Assemble DEC/INC 8/16 bits
+ASMIM	EQU	05B74H		; Assemble IM 0/1/2
+AOPCOD1	EQU	05B83H		; Assembler: put opcode1 and set len=2
+ASMCPD	EQU	05B8AH		; Assemble CPD/CPDR...
+ASMCALL	EQU	05B92H		; Assemble CALL [flg,]addr
+ASMCLJP	EQU	05B95H		; Assemble CALL & JP common code
+ASMUP16	EQU	05B9DH		; Assembler unfetch and put 16-bit addr or value
+ASMP16	EQU	05BA0H		; Assembler put 16-bit addr or value
+FETOPFL	EQU	05BA8H		; Fetch operand or flag
+FETFLG	EQU	05BABH		; Fetch flag
+FETFLG1	EQU	05BB9H		; Opn type in A is FLAG (6), flag num in B
+CHKCOMA	EQU	05BC9H		; Check comma
+FETOPAR	EQU	05BD2H		; Fetch and check opening parenthesis
+CHKOPAR	EQU	05BD5H		; Check opening parenthesis
+MOPNPAR	EQU	05BD9H		; Points to opening parenthesis (for later CALL CHKOPAR)
+ASMRET	EQU	05BDDH		; Assemble RET [flg]
+ASMJP	EQU	05BEBH		; Assemble JP [flg,]addr; JP (HL/IX/IY)
+ASMJR	EQU	05C0AH		; Assemble JR [flg,]offset
+ASMDJNZ	EQU	05C21H		; Assemble DJNZ offset
+ASMJOFF	EQU	05C22H		; Assembler compute jump offset
+ASMRST	EQU	05C4CH		; Assemble RST nn
+ASMCCF	EQU	05C5CH		; Assemble CCF... single-byte
+ASMIN	EQU	05C62H		; Assemble IN A,(nn) | IN R,(C)
+EBADAD1	EQU	05C8EH		; "BAD ADDRESSING MODE" error shortcut
+ASMOUT	EQU	05C9AH		; Assemble OUT (n),A | OUT (C),R|n
+ASMEX	EQU	05CD7H		; Assemble EX AF,AF' | EX DE,HL | EX (SP),HL|IX|IY
+ACHKHL	EQU	05CF7H		; Check for HL, if ok assemble sng-byte
+ASMEXNP	EQU	05D00H		; Assemble EX DE,HL | EX AF,AF'
+ASMEXAF	EQU	05D0FH		; Assemble EX AF,AF'
+ASNGIFZ	EQU	05D27H		; Assemble single-byte if Z
+ASMPOP	EQU	05D2CH		; Assemble POP|PUSH rr
+EBADAD2	EQU	05D45H		; "BAD ADDRESSING MODE" error shortcut
+ASMLD	EQU	05D48H		; Assemble LD xx,yy
+ALDRXMM	EQU	05D74H		; Assemble LD R|RR,(mem)
+ALDRXXY	EQU	05D85H		; Assemble LD R,(IX|IY+d)
+ALDRRMM	EQU	05D92H		; Assemble LD RR,(mmmm)
+ALDAMM	EQU	05DA2H		; Assemble LD A,(mmmm)
+ALDNOTR	EQU	05DAAH		; Assemble LD (HL|XY|mmmm),R|nn or LD RR,nnnn
+ALDMNXY	EQU	05DC7H		; Assemble LD (HL|mmmm),R|nn
+ALDM8B	EQU	05DD6H		; Assemble LD (HL),R|nn
+ALDMMRR	EQU	05DE6H		; Assemble LD (mmmm),RR
+ALDMMRX	EQU	05DFFH		; Assemble LD (mmmm),RR|A|IX|IY
+ALDMMAX	EQU	05E21H		; Assemble LD (mmmm),A|IX|IY
+ALDMMXY	EQU	05E30H		; Assemble LD (mmmm),IX|IY
+SBADADM	EQU	05E32H		; Shortcut to "BAD ADDRESSING MODE" error
+ALDHXNN	EQU	05E3CH		; Assemble LD HL|IX|IY,nnnn
+ALDMMMM	EQU	05E58H		; Assembler put 16-bit addr
+ALDNNNN	EQU	05E5CH		; Assembler put 16-bit value
+ALDSA	EQU	05E62H		; Assemble LD I|R,A or LD RR,RR
+ALDRRRR	EQU	05E77H		; Assemble LD RR,RR
+ALDNSP	EQU	05E98H		; Assemble LD RR,xx (except SP)
+ALDRRXX	EQU	05E9CH		; Assemble LD RR,nnnn|(mmmm)
+ALDHXMM	EQU	05EAAH		; Assemble LD HL|IX|IY,(mmmm)
+ASMDEFS	EQU	05EC8H		; Assemble DEFS
+ASETPC	EQU	05ECDH		; Assembler set PC to HL
+ASMDEFM	EQU	05ED1H		; Assemble DEFM
+ASMDEFB	EQU	05F0EH		; Assemble DEFB
+ASMDEFW	EQU	05F19H		; Assemble DEFW
+ASMORG	EQU	05F21H		; Assemble ORG
+ASMNOES	EQU	05F3BH		; Assembler: no end statement
+ASMEND	EQU	05F49H		; Assemble END
+ASMDEFL	EQU	05F81H		; Assemble DEFL
+ASMEQU	EQU	05F83H		; Assemble EQU
+ASMMACR	EQU	05F93H		; Assemble MACRO
+ESYNTAX	EQU	05FA8H		; "SYNTAX ERROR" error
+ASMENDM	EQU	05FBEH		; Assemble ENDM
+ASMCOND	EQU	05FE8H		; Assemble COND
+ASMENDC	EQU	05FFAH		; Assemble ENDC
+TINSTR	EQU	0600EH		; Table of instructions
+TVECASM	EQU	0615BH		; Table of assembler vectors
+CKENDST	EQU	0619BH		; Check end of statement
+ENDSTMT	EQU	061A9H		; Check end of stmt and process stmt
+LSTLIN0	EQU	061AFH		; List line with location - LD A,0AFH (skip XOR A)
+LSTLINE	EQU	061B0H		; List line without location
+OUTXHL1	EQU	06211H		; Out (HL):(HL-1) in hex
+OUTXHL	EQU	0621DH		; Out (HL) in hex
+HEXNIBL	EQU	0622CH		; Nibble in A to hex char
+ASMTOIM	EQU	06236H		; Assemble to internal memory
+ASMGEN	EQU	06263H		; Assembler generate binary output
+WCASBLK	EQU	062C5H		; Write cassette sys block
+LWCASBK	EQU	062D5H		; Write cassette sys block loop
+JWCASBK	EQU	062D6H		; Do write cassette sys block
+ECMDO	EQU	062E7H		; EDTASM cmd O - Manual origin
+MBADLBL	EQU	06349H		; "BAD LABEL"
+MJRERR	EQU	06352H		; "BRANCH OUT OF RANGE"
+MBADADM	EQU	06365H		; "BAD ADDRESSING MODE"
+MBADOPC	EQU	06378H		; "BAD OPCODE"
+MNOENDS	EQU	06382H		; "NO END STATEMENT"
+MFLDOVF	EQU	06392H		; "FIELD OVERFLOW"
+MTOTERR	EQU	063A0H		; "TOTAL ERRORS"
+MSYNTAX	EQU	063ACH		; "SYNTAX ERROR"
+MNESTED	EQU	063B8H		; "NESTED MACROS"
+MENDMWM	EQU	063C5H		; "ENDM WITHOUT MACRO"
+MENDCWC	EQU	063D7H		; "ENDC WITHOUT COND"
+MFSTLST	EQU	063E8H		; "FIRST?LAST?"
+MUSRORG	EQU	063F5H		; "USRORG?"
+MQUASH	EQU	063FEH		; "QUASH?"
+MURDMF	EQU	06404H		; "U(ndef)/R(edef)/D(efl)/M(acro)/F(wdref)"
+MBADADD	EQU	06409H		; "BAD ADDRESS"
+MBADMEM	EQU	06414H		; "BAD MEMORY"
+MMSINFO	EQU	0641EH		; "MISSING INFORMATION"
+MMULDEF	EQU	06431H		; "MULTIPLE DEFINITION"
+MMULSYM	EQU	06444H		; "MULTIPLY DEFINED SYMBOL"
+MUNDSYM	EQU	0645BH		; "UNDEFINED SYMBOL"
+MBADEXP	EQU	0646BH		; "BAD EXPRESSION"
+MSYMOVF	EQU	06479H		; "SYMBOL TABLE OVERFLOW"
+MSTKOVF	EQU	0648EH		; "STACK OVERFLOW"
+MDIV0	EQU	0649CH		; "DIVISION BY 0"
+MMACFWD	EQU	064A9H		; "MACRO FWD REF"
+CQUASH	EQU	064B6H		; Command 'Q'uash
+
+ECMDZ	EQU	064FEH		; EDTASM cmd Z - ZBUG ====== START ZBUG CODE ======
+RESTZB	EQU	06522H		; Restart with edit buffer and Z-bug bkpts preserved
+ZPMTCMD	EQU	0653AH		; ZBUG Prompt with '#' and get command
+ZGETCMD	EQU	06540H		; ZBUG get command
+ZERRMEM	EQU	0657CH		; disp "BAD MEMORY" error and abort
+ZPMTPND	EQU	06582H		; ZBUG Prompt with '#'
+S6584	EQU	06584H		; LD BC,203EH (skip next LD A,' ')
+ZPMTSPC	EQU	06585H		; ZBUG Prompt with ' '
+ZKEYSLH	EQU	0658FH		; ZBUG '[addr]/' key - open addr / curr loc
+ZXMHLTB	EQU	06596H		; ZBUG Exam @HL; tab
+ZTAB	EQU	0659EH		; ZBUG Display TAB and enable memory modification
+ZKEYUP	EQU	065A6H		; ZBUG Up key - exam previous byte
+ZXMHLNL	EQU	065A7H		; ZBUG New Line; exam @HL; tab
+ZKEYDN	EQU	065B3H		; ZBUG Down key - exam next location
+ZEXNLHL	EQU	065B8H		; ZBUG Exam loc @HL with NL
+ZEXAMHL	EQU	065C0H		; ZBUG Exam @HL
+ZEXARFL	EQU	065DCH		; Exam register or flags
+ZEXFLGS	EQU	065E7H		; Exam F-flags in A
+ZKEYCOL	EQU	065FCH		; ZBUG ':' key - exam curr loc in flags mode
+ZEXAREG	EQU	06602H		; ZBUG Exam reg
+ZEXAR16	EQU	06604H		; Exam 16-b register
+ZEXAR8	EQU	06606H		; Exam 8-bit reg
+ZRDADDR	EQU	06614H		; Read address from command line
+ZRANR16	EQU	06646H		; Try next 16-bit reg name
+ZRAR8	EQU	06659H		; Try 8-bit reg names
+ZRAEVAL	EQU	0666BH		; Eval address expression
+ZRAR8F	EQU	0666EH		; 8-bit reg name found
+ZKEYSCL	EQU	0667DH		; ZBUG ';' key - exam current loc in numeric mode
+S667E	EQU	0667EH		; LD B,0AFH (skip next XOR A)
+ZKEYEQ	EQU	0667FH		; ZBUG '[expr]=' key - eval expression/exam current loc
+ZKEYTAB	EQU	066ABH		; ZBUG Tab/Right key - open new location
+ZSVRGNM	EQU	066CAH		; ZBUG saved 8-bit reg names index
+ZSVRGNA	EQU	066CBH		; ZBUG saved 8-bit reg names index without I
+ZIMPCMD	EQU	066DEH		; ZBUG input command
+ZERR	EQU	06706H		; Display ZERR and abort cmd
+ZERRMSG	EQU	06709H		; Display error message in DE and abort
+ZINKEY	EQU	0671EH		; Get key and process it
+ZKEYESC	EQU	06753H		; ZBUG Esc key - get command
+VECZBUG	EQU	06765H		; Z-Bug keystrokes jump Table
+VECZCMD	EQU	06786H		; ZBUG $commands jump table
+ZDISSYM	EQU	067ECH		; Display DE in symbolic mode
+ZDISADD	EQU	06829H		; Display address in DE
+ZDISNUM	EQU	06834H		; Display DE in numeric format
+ZHEXOCT	EQU	06845H		; Display DE in hex or octal
+ZHEXHL	EQU	06860H		; ZBUG disp HL in hex
+ZHEXA	EQU	06866H		; LD C,1 = ZBUG disp A in hex
+ZDISLOC	EQU	06884H		; Display current location @HL
+ZDASMNO	EQU	06898H		; ZBUG Disass instr with no output
+ZDASM	EQU	068A6H		; ZBUG Disass instr
+ZXYINST	EQU	06908H		; Process DD-xx and FD-xx instructions
+ZCBINST	EQU	0690FH		; Process CB-xx instructions
+ZEDINST	EQU	0692CH		; Process ED-xx instructions
+ZDECINS	EQU	0693DH		; ZBUG: decode instruction
+ZDCSRCR	EQU	0698DH		; Disp ',' and 8b source reg
+ZDSRCR	EQU	0698FH		; Disp 8b source reg
+ZDCDSTR	EQU	06993H		; Disp ',' and 8b dest reg
+ZDDSTR	EQU	06995H		; Disp 8b dest reg
+ZD8BR	EQU	0699AH		; Disp 8b src/dst reg
+ZDATHL	EQU	069B1H		; ZBUG disp (HL)
+ZDCAT16	EQU	069B5H		; ZBUG disp ,(rr), rr=16b reg pair
+ZDAT16R	EQU	069B7H		; ZBUG disp (rr), rr=16b reg pair
+ZDCS6BR	EQU	069BEH		; ZBUG disp ',' and 16b reg pair
+ZD16BR	EQU	069C0H		; ZBUG disp 16b reg pair
+ZMREG8	EQU	069CCH		; 8-bit reg names
+ZMREG16	EQU	069CDH		; 16-bit reg names
+ZMSRG16	EQU	069D3H		; 16-bit special reg names
+ZDCONDC	EQU	069DBH		; ZBUG dasm conditional flag and add ','
+ZDCOND	EQU	069E1H		; ZBUG dasm conditional flag
+ZD2CNAM	EQU	069EAH		; ZBUG disp 2-char name from table in HL
+ZTCOND	EQU	069F6H		; ZBUG Table of conditional flags
+ZTSTIXY	EQU	06A06H		; Test for IX/IY -> NZ if not, C if IY
+ZJCCF	EQU	06A0CH		; ZBUG Jump to RET (no operand)
+ZDCIXIY	EQU	06A0DH		; ZBUG Test and display ',IX' | ',IY'
+ZDIXIY	EQU	06A13H		; ZBUG Test and display 'IX' | 'IY'
+ZFDCPOR	EQU	06A21H		; ZBUG Fetch and disp ',' and port number
+ZFDPORT	EQU	06A23H		; ZBUG Fetch and disp port number
+ZFDC8BV	EQU	06A2BH		; ZBUG Fetch and disp ',' and 8-bit value
+ZFD8BV	EQU	06A2DH		; ZBUG Fetch and disp 8-bit value
+ZFDCATN	EQU	06A32H		; ZBUG Fetch and disp ,(nnnn)
+ZFDATNN	EQU	06A34H		; ZBUG Fetch and disp (nnnn)
+ZDCPAR	EQU	06A39H		; ZBUG disp ')'
+ZFD16BV	EQU	06A3EH		; ZBUG Fetch and disp 16-bit value
+ZIHLDDE	EQU	06A45H		; Inc HL and disp addr in DE
+ZJRLC	EQU	06A49H		; ZBUG Jump #03
+ZJAND	EQU	06A4FH		; ZBUG Jump #02
+ZJBIT	EQU	06A5CH		; ZBUG Jump #04
+ZDIXYOF	EQU	06A6CH		; Fetch offset & Disp (IXY+off)
+ZDBITN	EQU	06A93H		; disp bit number
+ZJADC	EQU	06A9DH		; ZBUG Jump #05
+ZJADD	EQU	06AB4H		; ZBUG Jump #06
+ZJDEC	EQU	06ADBH		; ZBUG Jump #07
+ZJIM	EQU	06AF4H		; ZBUG Jump #08
+ZJCPD	EQU	06B00H		; ZBUG Jump #09
+ZJRET	EQU	06B02H		; ZBUG Disass RET [cond]
+ZJJP	EQU	06B0BH		; ZBUG Disass JP [cond,]nnnn | JP (HL|IXY)
+ZJCALL	EQU	06B33H		; ZBUG Disass CALL [cond,]nnnn
+ZJJR	EQU	06B3EH		; ZBUG Disass JR [cond,]offs
+ZJDJNZ	EQU	06B45H		; ZBUG Disass DJNZ offs
+ZJRST	EQU	06B5CH		; ZBUG Disass RST nn
+ZDADDSR	EQU	06B61H		; Disp addr in DE saving BC and HL
+ZJIN	EQU	06B69H		; ZBUG Disass IN r,(C) | IN A,(nn)
+ZDPORTC	EQU	06B74H		; Disp port number
+ZJINA	EQU	06B7BH		; ZBUG Disass IN A,(nn)
+ZJOUT	EQU	06B80H		; ZBUG Disass OUT (C),r | OUT (nn),A
+ZJOUTA	EQU	06B8CH		; ZBUG Disass OUT (nn),A
+ZDCOMA	EQU	06B8FH		; ZBUG disp ',A'
+ZJEX	EQU	06B94H		; ZBUG Disass EX AF,AF' | (SP),HL|IXY | DE,HL
+ZJSPHL	EQU	06BA0H		; ZBUG disp DE,HL | (SP),HL
+ZJDEHL	EQU	06BA6H		; ZBUG disp DE,HL | (SP),HL
+ZJAFAF	EQU	06BB3H		; ZBUG disp AF,AF'
+ZJPUPOP	EQU	06BBFH		; ZBUG Disass PUSH rr | POP rr
+ZDAF	EQU	06BCCH		; ZBUG disp AF
+ZJLD	EQU	06BD1H		; ZBUG Disass LD xx,xx
+ZD8B8B	EQU	06BFAH		; Disp 8b dest reg, 8b src reg
+ZD8BNN	EQU	06C02H		; Disp 8b dest reg, nn
+ZDSPHL	EQU	06C09H		; ZBUG Disp SP,HL
+ZDEDIXY	EQU	06C48H		; ZBUG LD with DD/ED/FD
+TZINSTR	EQU	06CD9H		; Table of instr 00-3F & C0-FF
+TZEDIN1	EQU	06D58H		; Table of ED instr - 1
+TZEDINS	EQU	06D59H		; Table of ED instr
+TJZBUG	EQU	06DCAH		; ZBUG Jump Table
+JRST08	EQU	06DF2H		; Handle ZBUG breakpoint
+ZCHKBKP	EQU	06E75H		; check if bkpt exists, Z if yes
+ZCLRSTP	EQU	06E8CH		; Clear instr stop points
+ZCLRBPS	EQU	06F00H		; clear all breakpoints
+ZSETBKP	EQU	06F28H		; set breakpoint
+ZCMDA	EQU	06F8CH		; ZBUG '$A' cmd - set ASCII output mode
+ZCMDMBW	EQU	06F95H		; ZBUG '$M'/'$B'/'$W' cmds - Mnemo/Byte/Word exam mode
+ZSETMBW	EQU	06FAFH		; Set Mnemo/Byte/Word exam mode
+ZCMDNZ	EQU	06FB2H		; ZBUG '$N'/'$S' cmds - numeric/symbolic debug mode
+ZCMDIO	EQU	06FBCH		; ZBUG 'rdx$I'/'rdx$O' cmds - set radix for input/output
+ZCMDX	EQU	06FECH		; ZBUG 'addr$X' cmd - set breakpoint at addr
+ZCMDY	EQU	07022H		; ZBUG '[n]$Y' cmd - yank nth/all breakpoint(s)
+ZCMDD	EQU	07046H		; ZBUG '$D' cmd - display all breakpoints
+ZCMDC	EQU	0706FH		; ZBUG '[n]$C' cmd - continue n times / resume exec
+ZCMDG	EQU	0709FH		; ZBUG '[addr]$G' cmd - go exec at addr / current PC
+ZKEYAT	EQU	070ACH		; ZBUG '[addr]@' key - single step from addr / curr loc
+ZCMDR	EQU	070CAH		; ZBUG '$R' cmd - display all regs
+ZCMDT	EQU	0714EH		; ZBUG 'first last $T' cmd - display block [first,last]
+ZCMDP	EQU	07162H		; ZBUG 'first last exec name$P' cmd - punch sys tape
+ZCMDL	EQU	071A6H		; ZBUG ' name$L' cmd - load system tape
+MFLAGS	EQU	07207H		; F-Flags: S-Z-?-H-?-P/V-N-C
+MZBUG	EQU	07211H		; "ZBUG"
+MZERR	EQU	07216H		; "ZERR"
+MBRKAT	EQU	0721AH		; "BRK @ "
+MAT	EQU	0721EH		; " @ "
+EBUFFER	EQU	07221H		; Editor buffer start
+MTITLE	EQU	07223H		; EDTASM PLUS TITLE
+TSTOLD1	EQU	07283H		; Test old M1 ROM
+ZCHKBSP	EQU	06E7AH		; check if brk or stop point exists, Z if yes
+ZCLRPTS	EQU	06F05H		; clear brk/stop points
+ZSETSTP	EQU	06F2CH		; Set stop point
+ZSTPFLD	EQU	06F4FH		; Set stop point failed
+ZSETSTB	EQU	06F17H		; Set stop point break
